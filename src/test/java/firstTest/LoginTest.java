@@ -6,6 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -70,6 +71,38 @@ public class LoginTest {
 
         LOGGER.info("Log out from site");
         driver.findElement(By.xpath("//a[@title='Log out']")).click();
+    }
+
+    @Test
+    public void loginIncorrectTest(){
+        String expectedResultWelcome = "Ласкаво просимо до Вікіпедії,";
+        String expectedResultLogin = "Incorrect username or password entered. Please try again.";
+
+        LOGGER.info("configure our driver timeout");
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        LOGGER.info("Make our window to full screen");
+        driver.manage().window().maximize();
+        LOGGER.info("Open site Wikipedia ob Ukrainian language");
+        driver.get("https://uk.wikipedia.org/");
+
+        LOGGER.info("Find title of main page and check if we are on Ukrainian language");
+        String actualResultWelcome = driver.findElement(By.xpath("//span[@id='Ласкаво_просимо_до_Вікіпедії,']")).getText();
+        Assert.assertEquals(actualResultWelcome, expectedResultWelcome);
+        LOGGER.info("Find and press button to switch to English language");
+        driver.findElement(By.xpath("//a[@lang='en']")).click();
+        LOGGER.info("Find login input field, clear and enter our login ");
+        driver.findElement(By.xpath("//li[@id='pt-login']/a")).click();
+        driver.findElement(By.xpath("//input[@id='wpName1']")).clear();
+        driver.findElement(By.xpath("//input[@id='wpName1']")).sendKeys("Student");
+        LOGGER.info("Find password input and enter our password");
+        driver.findElement(By.xpath("//input[@id='wpPassword1']")).sendKeys("cursorStudent");
+        LOGGER.info("Find 'Remember me' checkbox and click on it");
+        driver.findElement(By.xpath("//input[@class='mw-userlogin-rememberme']")).click();
+        LOGGER.info("Find 'Log in' button and push");
+        driver.findElement(By.xpath("//button[@id='wpLoginAttempt']")).click();
+        LOGGER.info("Find the error message, check its presence and the text of the message");
+        String actualResultLogin = driver.findElement(By.xpath("//div[@class='mw-message-box-error mw-message-box']")).getText();
+        Assert.assertEquals(actualResultLogin, expectedResultLogin);
     }
 
     @AfterMethod
